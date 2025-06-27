@@ -2,6 +2,8 @@
 import { onMounted } from "vue"
 import * as Cesium from "cesium"
 
+const emits = defineEmits(["onLoad"])
+
 onMounted(() => {
     initViewer()
 })
@@ -25,9 +27,14 @@ async function initViewer() {
         })
     })
 
+    // 加载天地图
     loadTDT(viewer, "1")
 
+    // 跳转默认视角
     defaultView(viewer)
+
+    // 执行完毕
+    onload(viewer)
 }
 
 // 加载天地图
@@ -64,6 +71,11 @@ const defaultView = (viewer: Cesium.Viewer) => {
     viewer.camera.flyToBoundingSphere(boundingSphere, {
         duration: 2 // 单位是秒
     })
+}
+
+// 执行完毕
+function onload(viewer: Cesium.Viewer) {
+    emits("onLoad", viewer)
 }
 
 </script>
