@@ -1,0 +1,12 @@
+diff --git a/node_modules/mockjs/dist/mock.js b/node_modules/mockjs/dist/mock.js
+index 35d5b9a..d35e9d2 100644
+--- a/node_modules/mockjs/dist/mock.js
++++ b/node_modules/mockjs/dist/mock.js
+@@ -8360,6 +8360,7 @@ return /******/ (function(modules) { // webpackBootstrap
+ 
+ 	        // 原生 XHR
+ 	        if (!this.match) {
++				this.custom.xhr.responseType = this.responseType
+ 	            this.custom.xhr.send(data)
+ 	            return
+ 	        }

@@ -1,12 +1,13 @@
-import './assets/main.css'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-
+import './assets/main.css';
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
-import App from './App.vue'
-import router from './router'
+import App from './App.vue';
+import router from './router';
+
+import './mock/index';
 
 const app = createApp(App)
 

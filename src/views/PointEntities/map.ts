@@ -1,14 +1,15 @@
-
+import type { Point } from "@/api/models/Point"
 
 import { Viewer } from "cesium"
 import * as Cesium from "cesium"
+
 
 let mapViewer: Viewer | null
 
 export function onMounted(viewer: Viewer, params?: any) {
     mapViewer = viewer
 
-    addPoints(viewer)
+    // addPoints(viewer)
 
     addRectangle(viewer)
 }
@@ -19,41 +20,12 @@ export function onUnmounted(viewer: Viewer, params?: any) {
 
 
 // 添加测试点位
-function addPoints(viewer: Viewer) {
-    const pointsInfo = [
-        {
-            id: "1",
-            latitude: "39.106866",
-            longitude: "117.033801",
-            psName: "测试点1",
-            typeId: "1"
-        },
-        {
-            id: "2",
-            latitude: "39.105186",
-            longitude: "117.040269",
-            psName: "测试点2",
-            typeId: "1"
-        },
-        {
-            id: "3",
-            latitude: "39.102358",
-            longitude: "117.028519",
-            psName: "测试点3",
-            typeId: "2"
-        },
-        {
-            id: "4",
-            latitude: "39.100734",
-            longitude: "117.039263",
-            psName: "测试点4",
-            typeId: "3"
-        }
-    ]
+export function addPoints(points: Point[]) {
 
-    pointsInfo.forEach(pInfo => {
-        viewer.entities.add({
-            id: pInfo.id,
+    console.log(points)
+    points.forEach((pInfo: Point) => {
+        mapViewer!.entities.add({
+            id: String(pInfo.id),
             position: Cesium.Cartesian3.fromDegrees(
                 Number(pInfo.longitude),
                 Number(pInfo.latitude)
@@ -76,7 +48,7 @@ function addPoints(viewer: Viewer) {
             // },
             // 图标
             billboard: {
-                image: `/assets/images/point-${pInfo.typeId}.png`,
+                image: `/assets/images/point-${pInfo.type}.png`,
                 // scale: 0.2
             },
         })
