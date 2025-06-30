@@ -25,7 +25,29 @@ function addPoints(viewer: Viewer) {
             id: "1",
             latitude: "39.106866",
             longitude: "117.033801",
-            psName: "测试点1"
+            psName: "测试点1",
+            typeId: "1"
+        },
+        {
+            id: "2",
+            latitude: "39.105186",
+            longitude: "117.040269",
+            psName: "测试点2",
+            typeId: "1"
+        },
+        {
+            id: "3",
+            latitude: "39.102358",
+            longitude: "117.028519",
+            psName: "测试点3",
+            typeId: "2"
+        },
+        {
+            id: "4",
+            latitude: "39.100734",
+            longitude: "117.039263",
+            psName: "测试点4",
+            typeId: "3"
         }
     ]
 
@@ -54,8 +76,8 @@ function addPoints(viewer: Viewer) {
             // },
             // 图标
             billboard: {
-                image: "/assets/images/point.png",
-                scale: 0.2
+                image: `/assets/images/point-${pInfo.typeId}.png`,
+                // scale: 0.2
             },
         })
     })
