@@ -25,6 +25,9 @@ mapWork.myCustomEvt.addEventListener((event: {
   if (event.type === 'click') {
     handleViwerClick(event)
   }
+  if(event.type === "closePopup") {
+    popupObject.visible = false
+  }
 })
 
 
@@ -45,10 +48,9 @@ async function fetchData() {
 
 // 处理视图上的点击事件
 function handleViwerClick(event: any) {
-  popupObject.visible = false
+  popupObject.visible = true
   popupObject.position.x = event.position.x;
   popupObject.position.y = event.position.y;
-  popupObject.visible = true
 }
 
 

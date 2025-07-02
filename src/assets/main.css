@@ -1,3 +1,9 @@
 @import './base.css';
 @import './myCesiumStyle.css';
 
+
+
+body {
+    /* 防止出现滚动跳 */
+    overflow: hidden;
+}

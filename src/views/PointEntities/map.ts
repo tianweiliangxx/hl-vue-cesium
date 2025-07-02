@@ -96,6 +96,35 @@ function addHandler(viewer: Viewer) {
                 type: "click",
                 position: event.position
             })
+
+            const scene = viewer.scene;
+            scene.preRender.addEventListener(() => {
+
+                // 将笛卡尔坐标系中的位置转换为画布坐标系中的位置。这通常用于将 HTML 元素放置在场景中对象相同的屏幕位置。
+                const canvasPosition = scene.cartesianToCanvasCoordinates(cartesian, new Cesium.Cartesian2())
+
+                if (Cesium.defined(canvasPosition)) {
+                    myCustomEvt.raiseEvent({
+                        type: "click",
+                        position: canvasPosition
+                    })
+                }
+
+                // 当前相机高度
+                let n = scene.globe.ellipsoid.cartesianToCartographic(viewer.camera.position).height
+                // 判断弹窗位置与相机高度的距离是否大于地球半径
+                // 这里比的是相机当点位的距离，是否大于相机到地心的距离，如果大于相机到地心的距离说明，点位已经在地球的背面了
+                if ((n += 1 * scene.globe.ellipsoid.maximumRadius, Cesium.Cartesian3.distance(viewer.camera.position, cartesian) > n)) {
+                    myCustomEvt.raiseEvent({
+                        type: "closePopup"
+                    })
+                } else {
+                    myCustomEvt.raiseEvent({
+                        type: "click",
+                        position: canvasPosition
+                    })
+                }
+            })
         }
 
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
