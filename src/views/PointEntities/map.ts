@@ -5,13 +5,17 @@ import * as Cesium from "cesium"
 
 
 let mapViewer: Viewer | null
+let handler: Cesium.ScreenSpaceEventHandler
+
+export const myCustomEvt = new Cesium.Event()
 
 export function onMounted(viewer: Viewer, params?: any) {
     mapViewer = viewer
 
-    // addPoints(viewer)
-
     addRectangle(viewer)
+
+    // 添加监听器
+    addHandler(viewer)
 }
 
 export function onUnmounted(viewer: Viewer, params?: any) {
@@ -21,8 +25,6 @@ export function onUnmounted(viewer: Viewer, params?: any) {
 
 // 添加测试点位
 export function addPoints(points: Point[]) {
-
-    console.log(points)
     points.forEach((pInfo: Point) => {
         mapViewer!.entities.add({
             id: String(pInfo.id),
@@ -72,4 +74,28 @@ function addRectangle(viewer: any) {
             // outlineColor: Cesium.Color.YELLOW, // 配置 设置外边框线颜色
         },
     })
+}
+
+// 添加监听器
+function addHandler(viewer: Viewer) {
+    handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+
+    handler.setInputAction((event: any) => {
+        // 屏幕坐标转成世界坐标
+        const cartesian = viewer.camera.pickEllipsoid(event.position, viewer.scene.globe.ellipsoid);
+
+        if (cartesian) {
+            // 转成地理坐标经纬度
+            const cartagraphic = Cesium.Cartographic.fromCartesian(cartesian);
+
+            // 将弧度转为度的十进制表示，保留5位小数
+            const lon = Cesium.Math.toDegrees(cartagraphic.longitude).toFixed(5);
+            const lat = Cesium.Math.toDegrees(cartagraphic.latitude).toFixed(5);
+
+            myCustomEvt.raiseEvent({
+                type: "click"
+            })
+        }
+
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
 }

@@ -9,7 +9,14 @@ import * as mapWork from './map'
 
 useLifecycle(mapWork)
 
+mapWork.myCustomEvt.addEventListener((event: {
+  type: string
+}) => {
+  console.log(event)
+})
+
 let points: Point[]
+
 onMounted(async() => {
 
   await fetchData()
