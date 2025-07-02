@@ -93,7 +93,8 @@ function addHandler(viewer: Viewer) {
             const lat = Cesium.Math.toDegrees(cartagraphic.latitude).toFixed(5);
 
             myCustomEvt.raiseEvent({
-                type: "click"
+                type: "click",
+                position: event.position
             })
         }
 
