@@ -7,6 +7,9 @@ import * as Cesium from "cesium"
 let mapViewer: Viewer | null
 let handler: Cesium.ScreenSpaceEventHandler
 
+// 鼠标点
+let cartesianPointClick: Cesium.Cartesian3
+
 export const myCustomEvt = new Cesium.Event()
 
 export function onMounted(viewer: Viewer, params?: any) {
@@ -81,17 +84,37 @@ function addHandler(viewer: Viewer) {
     handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 
     handler.setInputAction((event: any) => {
+
+        // 判断是否点击实体
+        let pickedObject = viewer.scene.pick(event.position);
+        console.log(pickedObject);
+        // 只在实体上进行操作
+        if (!pickedObject) {
+            console.log(123456)
+            viewer.scene.preRender.removeEventListener(listenPreRender)
+
+            myCustomEvt.raiseEvent({
+                type: "closePopup"
+            })
+
+            // listenter = null
+            return
+        }
+
         // 屏幕坐标转成世界坐标
         const cartesian = viewer.camera.pickEllipsoid(event.position, viewer.scene.globe.ellipsoid);
 
         if (cartesian) {
+
+            cartesianPointClick = cartesian
             // 转成地理坐标经纬度
-            const cartagraphic = Cesium.Cartographic.fromCartesian(cartesian);
+            const cartagraphic = Cesium.Cartographic.fromCartesian(cartesianPointClick);
 
             // 将弧度转为度的十进制表示，保留5位小数
             const lon = Cesium.Math.toDegrees(cartagraphic.longitude).toFixed(5);
             const lat = Cesium.Math.toDegrees(cartagraphic.latitude).toFixed(5);
 
+            // 飞过去
             flyToPoints(Number(lon), Number(lat))
 
             myCustomEvt.raiseEvent({
@@ -99,34 +122,8 @@ function addHandler(viewer: Viewer) {
                 position: event.position
             })
 
-            const scene = viewer.scene;
-            scene.preRender.addEventListener(() => {
-
-                // 将笛卡尔坐标系中的位置转换为画布坐标系中的位置。这通常用于将 HTML 元素放置在场景中对象相同的屏幕位置。
-                const canvasPosition = scene.cartesianToCanvasCoordinates(cartesian, new Cesium.Cartesian2())
-
-                if (Cesium.defined(canvasPosition)) {
-                    myCustomEvt.raiseEvent({
-                        type: "click",
-                        position: canvasPosition
-                    })
-                }
-
-                // 当前相机高度
-                let n = scene.globe.ellipsoid.cartesianToCartographic(viewer.camera.position).height
-                // 判断弹窗位置与相机高度的距离是否大于地球半径
-                // 这里比的是相机当点位的距离，是否大于相机到地心的距离，如果大于相机到地心的距离说明，点位已经在地球的背面了
-                if ((n += 1 * scene.globe.ellipsoid.maximumRadius, Cesium.Cartesian3.distance(viewer.camera.position, cartesian) > n)) {
-                    myCustomEvt.raiseEvent({
-                        type: "closePopup"
-                    })
-                } else {
-                    myCustomEvt.raiseEvent({
-                        type: "click",
-                        position: canvasPosition
-                    })
-                }
-            })
+            // 添加渲染监听器，根据视图变化改变弹窗的位置
+            viewer.scene.preRender.addEventListener(listenPreRender)
         }
 
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
@@ -134,8 +131,40 @@ function addHandler(viewer: Viewer) {
 
 // 点位定位
 function flyToPoints(lon: number, lat: number) {
-    const target = new Cesium.BoundingSphere(Cesium.Cartesian3.fromDegrees(lon, lat, 100), 15000)
+    const target = new Cesium.BoundingSphere(Cesium.Cartesian3.fromDegrees(lon, lat, 100), 1500)
     if (mapViewer) {
         mapViewer.camera.flyToBoundingSphere(target)
+    }
+}
+
+// 监听场景更新
+function listenPreRender() {
+    console.log(123123)
+    if(!mapViewer) return
+    const scene = mapViewer.scene
+    // 将笛卡尔坐标系中的位置转换为画布坐标系中的位置。这通常用于将 HTML 元素放置在场景中对象相同的屏幕位置。
+    const canvasPosition = scene.cartesianToCanvasCoordinates(cartesianPointClick, new Cesium.Cartesian2())
+
+    // 更新弹窗位置
+    if (Cesium.defined(canvasPosition)) {
+        myCustomEvt.raiseEvent({
+            type: "handleUpdatePopup",
+            position: canvasPosition
+        })
+    }
+
+    // 当前相机高度
+    let n = scene.globe.ellipsoid.cartesianToCartographic(mapViewer.camera.position).height
+    // 判断弹窗位置与相机高度的距离是否大于地球半径
+    // 这里比的是相机当点位的距离，是否大于相机到地心的距离，如果大于相机到地心的距离说明，点位已经在地球的背面了
+    if ((n += 1 * scene.globe.ellipsoid.maximumRadius, Cesium.Cartesian3.distance(mapViewer.camera.position, cartesianPointClick) > n)) {
+        myCustomEvt.raiseEvent({
+            type: "closePopup"
+        })
+    } else {
+        myCustomEvt.raiseEvent({
+            type: "click",
+            position: canvasPosition
+        })
     }
 }
