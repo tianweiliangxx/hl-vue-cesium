@@ -92,6 +92,8 @@ function addHandler(viewer: Viewer) {
             const lon = Cesium.Math.toDegrees(cartagraphic.longitude).toFixed(5);
             const lat = Cesium.Math.toDegrees(cartagraphic.latitude).toFixed(5);
 
+            flyToPoints(Number(lon), Number(lat))
+
             myCustomEvt.raiseEvent({
                 type: "click",
                 position: event.position
@@ -128,4 +130,12 @@ function addHandler(viewer: Viewer) {
         }
 
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+}
+
+// 点位定位
+function flyToPoints(lon: number, lat: number) {
+    const target = new Cesium.BoundingSphere(Cesium.Cartesian3.fromDegrees(lon, lat, 100), 15000)
+    if (mapViewer) {
+        mapViewer.camera.flyToBoundingSphere(target)
+    }
 }
